@@ -1,0 +1,21 @@
+/* Custom styles to complement Tailwind utilities (pastel badges, small layout tweaks) */
+.task-item{display:flex;gap:.5rem;align-items:center;padding:.75rem}
+.task-item + .task-item{border-top:1px solid rgba(15,23,42,0.04)}
+.task-item .title{flex:1;color:#0f172a}
+.task-item.completed .title{text-decoration:line-through;color:#94a3b8}
+.badge{padding:.18rem .5rem;border-radius:999px;font-size:.75rem;font-weight:600}
+.badge.high{background:#ffd6e0;color:#6b0f2b}
+.badge.normal{background:#fff4d6;color:#7a4a00}
+.badge.low{background:#e6f6ff;color:#044e7c}
+.btn{background:transparent;border:none;color:#475569;cursor:pointer;padding:.25rem;font-size:1rem}
+.cb{width:1.05rem;height:1.05rem}
+
+/* make the list container slightly elevated */
+.task-list{overflow:hidden}
+
+@media (max-width:640px){
+  .task-item{padding:.6rem}
+}
+
+/* small focus ring for interactive elements */
+button:focus, input:focus, select:focus{outline:none;box-shadow:0 0 0 4px rgba(99,102,241,0.08)}
