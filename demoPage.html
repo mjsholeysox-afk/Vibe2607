@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5, CSS3, JavaScript 데모 페이지</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .demo-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .demo-section h2 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .output {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            color: #333;
+        }
+
+        .box {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            animation: slideIn 0.5s ease;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .box.spin {
+            animation: spin 1s linear infinite;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 10px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .color-box {
+            width: 100%;
+            height: 100px;
+            border-radius: 8px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+            background-color: #667eea;
+        }
+
+        .list-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item button {
+            padding: 5px 10px;
+            font-size: 0.85em;
+            background: #ff6b6b;
+        }
+
+        .list-item button:hover {
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 0.9em;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 20px;
+        }
+
+        .count-display {
+            font-size: 2em;
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 데모 페이지</h1>
+            <p class="subtitle">HTML5, CSS3, JavaScript 기술 데모</p>
+        </header>
+
+        <!-- CSS3 애니메이션 데모 -->
+        <section class="demo-section">
+            <h2>CSS3 애니메이션</h2>
+            <div class="button-group">
+                <button onclick="toggleSpin()">회전 애니메이션</button>
+                <button onclick="resetBox()">초기화</button>
+            </div>
+            <div class="box" id="animatedBox"></div>
+        </section>
+
+        <!-- JavaScript 상호작용 데모 -->
+        <section class="demo-section">
+            <h2>JavaScript 상호작용</h2>
+            <div class="button-group">
+                <button onclick="incrementCount()">+</button>
+                <button onclick="decrementCount()">−</button>
+                <button onclick="resetCount()">초기화</button>
+            </div>
+            <div class="output">
+                <span class="count-display" id="counter">0</span>
+            </div>
+        </section>
+
+        <!-- 색상 선택기 데모 -->
+        <section class="demo-section">
+            <h2>색상 선택기</h2>
+            <input type="text" id="colorInput" placeholder="#667eea 형식으로 색상 코드 입력" value="#667eea">
+            <button onclick="changeColor()">색상 적용</button>
+            <div class="color-box" id="colorBox"></div>
+        </section>
+
+        <!-- HTML5 폼 & JavaScript 리스트 데모 -->
+        <section class="demo-section">
+            <h2>할 일 목록</h2>
+            <div>
+                <input type="text" id="todoInput" placeholder="새 할 일을 입력하세요..." onkeypress="handleKeyPress(event)">
+                <button onclick="addTodo()">추가</button>
+            </div>
+            <div id="todoList" style="margin-top: 15px;"></div>
+        </section>
+
+        <footer>
+            <p>© 2026 HTML5 CSS3 JavaScript 데모 페이지</p>
+        </footer>
+    </div>
+
+    <script>
+        // 애니메이션 토글
+        function toggleSpin() {
+            const box = document.getElementById('animatedBox');
+            box.classList.toggle('spin');
+        }
+
+        function resetBox() {
+            const box = document.getElementById('animatedBox');
+            box.classList.remove('spin');
+        }
+
+        // 카운터 기능
+        let count = 0;
+
+        function incrementCount() {
+            count++;
+            updateCounter();
+        }
+
+        function decrementCount() {
+            count--;
+            updateCounter();
+        }
+
+        function resetCount() {
+            count = 0;
+            updateCounter();
+        }
+
+        function updateCounter() {
+            document.getElementById('counter').textContent = count;
+        }
+
+        // 색상 변경
+        function changeColor() {
+            const colorInput = document.getElementById('colorInput').value;
+            const colorBox = document.getElementById('colorBox');
+            
+            // 유효한 색상 코드 확인
+            if (/^#[0-9A-F]{6}$/i.test(colorInput)) {
+                colorBox.style.backgroundColor = colorInput;
+                alert('색상이 적용되었습니다! ✓');
+            } else {
+                alert('올바른 색상 코드를 입력하세요. (#RRGGBB 형식)');
+            }
+        }
+
+        // 할 일 목록
+        let todos = [];
+
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            const todoText = input.value.trim();
+
+            if (todoText === '') {
+                alert('할 일을 입력해주세요.');
+                return;
+            }
+
+            todos.push({
+                id: Date.now(),
+                text: todoText
+            });
+
+            input.value = '';
+            renderTodos();
+        }
+
+        function removeTodo(id) {
+            todos = todos.filter(todo => todo.id !== id);
+            renderTodos();
+        }
+
+        function renderTodos() {
+            const todoList = document.getElementById('todoList');
+            todoList.innerHTML = '';
+
+            if (todos.length === 0) {
+                todoList.innerHTML = '<p style="color: #999; text-align: center;">할 일이 없습니다.</p>';
+                return;
+            }
+
+            todos.forEach(todo => {
+                const li = document.createElement('div');
+                li.className = 'list-item';
+                li.innerHTML = `
+                    <span>${todo.text}</span>
+                    <button onclick="removeTodo(${todo.id})">삭제</button>
+                `;
+                todoList.appendChild(li);
+            });
+        }
+
+        // Enter 키 이벤트
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                addTodo();
+            }
+        }
+    </script>
+</body>
+</html>

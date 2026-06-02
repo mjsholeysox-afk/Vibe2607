@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTML5 CSS3 JavaScript 테트리스</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 320px 220px;
+      gap: 20px;
+      width: min(100%, 600px);
+    }
+
+    .board {
+      width: 320px;
+      aspect-ratio: 10 / 20;
+      background: #111827;
+      border: 4px solid #334155;
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(20, 1fr);
+      gap: 2px;
+      padding: 4px;
+    }
+
+    .cell {
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      background: #0f172a;
+      transition: background 0.1s ease;
+    }
+
+    .cell.filled {
+      background: #38bdf8;
+      box-shadow: inset 0 0 8px rgba(56, 189, 248, 0.6);
+    }
+
+    .cell.i { background: #06b6d4; }
+    .cell.j { background: #2563eb; }
+    .cell.l { background: #f97316; }
+    .cell.o { background: #eab308; }
+    .cell.s { background: #22c55e; }
+    .cell.t { background: #a855f7; }
+    .cell.z { background: #ef4444; }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel h1 {
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .status,
+    .controls {
+      background: #111827;
+      border: 2px solid #334155;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .status div,
+    .controls button {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1rem;
+    }
+
+    .controls button {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .controls button:hover {
+      background: #334155;
+      transform: translateY(-1px);
+    }
+
+    .instructions {
+      display: grid;
+      gap: 10px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      background: #111827;
+      border: 2px solid #334155;
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .instructions strong {
+      color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="board" id="board"></div>
+
+    <div class="panel">
+      <h1>테트리스</h1>
+
+      <div class="status">
+        <div><span>점수</span><span id="score">0</span></div>
+        <div><span>줄</span><span id="lines">0</span></div>
+        <div><span>레벨</span><span id="level">1</span></div>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn">게임 시작</button>
+        <button id="pauseBtn">일시정지</button>
+      </div>
+
+      <div class="instructions">
+        <strong>조작법</strong>
+        <div>← / → : 이동</div>
+        <div>↑ : 회전</div>
+        <div>↓ : 하강 가속</div>
+        <div>스페이스 : 즉시 떨어뜨리기</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const boardElement = document.getElementById('board');
+    const scoreElement = document.getElementById('score');
+    const linesElement = document.getElementById('lines');
+    const levelElement = document.getElementById('level');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+
+    const COLS = 10;
+    const ROWS = 20;
+    const COLOR_MAP = {
+      i: 'i',
+      j: 'j',
+      l: 'l',
+      o: 'o',
+      s: 's',
+      t: 't',
+      z: 'z'
+    };
+
+    const SHAPES = {
+      i: [
+        [[0,1], [1,1], [2,1], [3,1]],
+        [[2,0], [2,1], [2,2], [2,3]],
+      ],
+      j: [
+        [[0,0], [0,1], [1,1], [2,1]],
+        [[1,0], [2,0], [1,1], [1,2]],
+        [[0,1], [1,1], [2,1], [2,2]],
+        [[1,0], [1,1], [0,2], [1,2]],
+      ],
+      l: [
+        [[2,0], [0,1], [1,1], [2,1]],
+        [[1,0], [1,1], [1,2], [2,2]],
+        [[0,1], [1,1], [2,1], [0,2]],
+        [[0,0], [1,0], [1,1], [1,2]],
+      ],
+      o: [
+        [[1,0], [2,0], [1,1], [2,1]],
+      ],
+      s: [
+        [[1,0], [2,0], [0,1], [1,1]],
+        [[1,0], [1,1], [2,1], [2,2]],
+      ],
+      t: [
+        [[1,0], [0,1], [1,1], [2,1]],
+        [[1,0], [1,1], [2,1], [1,2]],
+        [[0,1], [1,1], [2,1], [1,2]],
+        [[1,0], [0,1], [1,1], [1,2]],
+      ],
+      z: [
+        [[0,0], [1,0], [1,1], [2,1]],
+        [[2,0], [1,1], [2,1], [1,2]],
+      ]
+    };
+
+    let board = [];
+    let cells = [];
+    let score = 0;
+    let lines = 0;
+    let level = 1;
+    let dropInterval = 800;
+    let dropTimer = null;
+    let currentPiece = null;
+    let isPaused = false;
+    let gameOver = false;
+
+    function createBoard() {
+      board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+      boardElement.innerHTML = '';
+      cells = [];
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          boardElement.appendChild(cell);
+          cells.push(cell);
+        }
+      }
+    }
+
+    function randomPiece() {
+      const types = Object.keys(SHAPES);
+      const type = types[Math.floor(Math.random() * types.length)];
+      const shape = SHAPES[type];
+      return {
+        type,
+        rotation: 0,
+        shape,
+        x: 3,
+        y: 0,
+      };
+    }
+
+    function getCells(piece) {
+      return piece.shape[piece.rotation].map(([x, y]) => ({ x: piece.x + x, y: piece.y + y }));
+    }
+
+    function draw() {
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const cell = cells[r * COLS + c];
+          const value = board[r][c];
+          cell.className = 'cell' + (value ? ` ${COLOR_MAP[value]}` : '');
+        }
+      }
+
+      if (currentPiece) {
+        getCells(currentPiece).forEach(({ x, y }) => {
+          if (y >= 0 && y < ROWS && x >= 0 && x < COLS) {
+            const cell = cells[y * COLS + x];
+            cell.className = `cell ${COLOR_MAP[currentPiece.type]}`;
+          }
+        });
+      }
+    }
+
+    function collide(piece, offsetX = 0, offsetY = 0, rotation = null) {
+      const rotationIndex = rotation === null ? piece.rotation : rotation;
+      const shape = piece.shape[rotationIndex];
+      return shape.some(([x, y]) => {
+        const newX = piece.x + x + offsetX;
+        const newY = piece.y + y + offsetY;
+        return (
+          newX < 0 ||
+          newX >= COLS ||
+          newY >= ROWS ||
+          (newY >= 0 && board[newY][newX])
+        );
+      });
+    }
+
+    function mergePiece() {
+      getCells(currentPiece).forEach(({ x, y }) => {
+        if (y >= 0 && y < ROWS && x >= 0 && x < COLS) {
+          board[y][x] = currentPiece.type;
+        }
+      });
+    }
+
+    function clearLines() {
+      let linesCleared = 0;
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (board[r].every(cell => cell !== null)) {
+          board.splice(r, 1);
+          board.unshift(Array(COLS).fill(null));
+          linesCleared++;
+          r++;
+        }
+      }
+      if (linesCleared > 0) {
+        score += [0, 100, 300, 500, 800][linesCleared];
+        lines += linesCleared;
+        level = Math.min(20, 1 + Math.floor(lines / 10));
+        dropInterval = Math.max(100, 800 - (level - 1) * 60);
+      }
+    }
+
+    function newPiece() {
+      currentPiece = randomPiece();
+      if (collide(currentPiece)) {
+        gameOver = true;
+        clearInterval(dropTimer);
+        alert('게임 오버! 점수: ' + score);
+      }
+    }
+
+    function movePiece(offsetX, offsetY) {
+      if (!currentPiece || gameOver) return;
+      if (!collide(currentPiece, offsetX, offsetY)) {
+        currentPiece.x += offsetX;
+        currentPiece.y += offsetY;
+      }
+      draw();
+    }
+
+    function rotatePiece() {
+      if (!currentPiece || gameOver) return;
+      const nextRotation = (currentPiece.rotation + 1) % currentPiece.shape.length;
+      if (!collide(currentPiece, 0, 0, nextRotation)) {
+        currentPiece.rotation = nextRotation;
+      } else {
+        const kicks = [-1, 1, -2, 2];
+        for (const dx of kicks) {
+          if (!collide(currentPiece, dx, 0, nextRotation)) {
+            currentPiece.x += dx;
+            currentPiece.rotation = nextRotation;
+            break;
+          }
+        }
+      }
+      draw();
+    }
+
+    function drop() {
+      if (!currentPiece || gameOver) return;
+      if (!collide(currentPiece, 0, 1)) {
+        currentPiece.y += 1;
+      } else {
+        mergePiece();
+        clearLines();
+        newPiece();
+      }
+      updateStatus();
+      draw();
+    }
+
+    function hardDrop() {
+      if (!currentPiece || gameOver) return;
+      while (!collide(currentPiece, 0, 1)) {
+        currentPiece.y += 1;
+      }
+      drop();
+    }
+
+    function updateStatus() {
+      scoreElement.textContent = score;
+      linesElement.textContent = lines;
+      levelElement.textContent = level;
+    }
+
+    function startGame() {
+      createBoard();
+      score = 0;
+      lines = 0;
+      level = 1;
+      dropInterval = 800;
+      gameOver = false;
+      isPaused = false;
+      currentPiece = null;
+      newPiece();
+      updateStatus();
+      draw();
+      if (dropTimer) clearInterval(dropTimer);
+      dropTimer = setInterval(() => {
+        if (!isPaused && !gameOver) drop();
+      }, dropInterval);
+    }
+
+    function togglePause() {
+      if (gameOver) return;
+      isPaused = !isPaused;
+      pauseBtn.textContent = isPaused ? '재개' : '일시정지';
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (gameOver) return;
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        movePiece(-1, 0);
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        movePiece(1, 0);
+      }
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        rotatePiece();
+      }
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        movePiece(0, 1);
+      }
+      if (event.key === ' ') {
+        event.preventDefault();
+        hardDrop();
+      }
+    });
+
+    startBtn.addEventListener('click', startGame);
+    pauseBtn.addEventListener('click', togglePause);
+
+    createBoard();
+    draw();
+  </script>
+</body>
+</html>
